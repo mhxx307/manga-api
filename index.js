@@ -20,7 +20,7 @@ dotenv.config(
 const port = process.env.PORT || 8000;
 const url = "https://nettruyenco.vn/tim-truyen/";
 const urlTruyenTranh = "https://nettruyenco.vn/truyen-tranh/";
-const localUrl = `http://localhost:${port}`;
+const localUrl = `https://manga-api-be05.onrender.com`;
 
 function pushData(response, manga, limit, res) {
     const html = response.data;
