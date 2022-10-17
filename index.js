@@ -20,7 +20,10 @@ dotenv.config(
 const port = process.env.PORT || 8000;
 const url = "https://nettruyenco.vn/tim-truyen/";
 const urlTruyenTranh = "https://nettruyenco.vn/truyen-tranh/";
+const urlAnilist = "https://anilist.co/search/manga/popular";
+
 const localUrl = `https://manga-api-be05.onrender.com`;
+// const localUrl = `http://localhost:${port}`;
 
 function pushData(response, manga, limit, res) {
     const html = response.data;
@@ -52,6 +55,7 @@ function pushData(response, manga, limit, res) {
             updateDate,
             description,
             chapter,
+            nameAndId: link.split("https://nettruyenco.vn/truyen-tranh/")[1],
         });
     });
     if (limit && limit > 0) {
@@ -63,134 +67,145 @@ function pushData(response, manga, limit, res) {
 
 // routes
 // get all manga
-// ex: http://localhost:8000/all/page=1
-app.get("/all/page=:pageNumber", (req, res) => {
+// ex: http://localhost:8000/v1
+// ex: http://localhost:8000/v1?page=1
+
+// get manga by status
+// status: hoàn thành(2), đang tiến hành(1), all(-1)
+// ex: http://localhost:8000/v1?status=2
+// ex: http://localhost:8000/v1?status=2&page=1
+
+// get manga by sort
+// sort: (15)Truyện mới, (10)Top all, (11)top tháng, (12)top tuần, (13)top ngày, (30) số chapter
+// ex: http://localhost:8000/v1?status=2&sort=30
+// ex: http://localhost:8000/v1?status=-1&sort=15&page=1
+
+app.get("/v1", (req, res) => {
     const manga = [];
     const limit = Number(req.query.limit);
+    const page = Number(req.query.page);
+    const status = Number(req.query.status);
+    const sort = Number(req.query.sort);
     try {
-        axios(url + "manga-112?page=" + req.params.pageNumber)
-            .then(function (response) {
-                pushData(response, manga, limit, res);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+        if (page && !status && !sort) {
+            axios(url + "?page=" + page)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (page && status && !sort) {
+            axios(url + "?status=" + status + "&page=" + page)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (!page && status && !sort) {
+            axios(url + "?status=" + status)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (!page && !status && !sort) {
+            axios(url)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (status && page && sort) {
+            axios(url + "?status=" + status + "&sort=" + sort + "&page=" + page)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (status && sort) {
+            axios(url + "?status=" + status + "&sort=" + sort)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
     } catch (error) {
         res.status(500).json(error);
     }
 });
 
 // get manga by category
-// ex: http://localhost:8000/all/adventure/page=1
-app.get("/all/:category/page=:pageNumber", (req, res) => {
+// ex: http://localhost:8000/v1/adventure
+// ex: http://localhost:8000/v1/adventure?page=1
+// ex: http://localhost:8000/v1/action-95?status=1
+// ex: http://localhost:8000/v1/action-95?status=1&page=1
+// ex: http://localhost:8000/v1/action-95?status=-1&sort=30
+// ex: http://localhost:8000/v1/action-95?status=-1&sort=30&page=2
+app.get("/v1/:category", (req, res) => {
     const manga = [];
     const limit = Number(req.query.limit);
+    const page = Number(req.query.page);
+    const status = Number(req.query.status);
+    const sort = Number(req.query.sort);
     try {
-        axios(url + req.params.category + "?page=" + req.params.pageNumber)
-            .then(function (response) {
-                pushData(response, manga, limit, res);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    } catch (error) {
-        res.status(500).json(error);
-    }
-});
-
-// get all manga by status
-// status: (-1)tất cả, (2)Hoàn thành, (1)đang tiến hành
-// ex: http://localhost:8000/all/status=1&page=1
-app.get("/all/status=:status&page=:pageNumber", (req, res) => {
-    const manga = [];
-    const limit = Number(req.query.limit);
-    try {
-        axios(url + "?status=" + req.params.status + "&page=" + req.params.pageNumber)
-            .then(function (response) {
-                pushData(response, manga, limit, res);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    } catch (error) {
-        res.status(500).json(error);
-    }
-});
-
-// get manga by category and status
-// ex: http://localhost:8000/all/action-95/status=1&page=1
-app.get("/all/:category/status=:status&page=:pageNumber", (req, res) => {
-    const manga = [];
-    const limit = Number(req.query.limit);
-    try {
-        axios(
-            url +
-                req.params.category +
-                "?status=" +
-                req.params.status +
-                "&page=" +
-                req.params.pageNumber
-        )
-            .then(function (response) {
-                pushData(response, manga, limit, res);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    } catch (error) {
-        res.status(500).json(error);
-    }
-});
-
-// get manga by sort
-// sort: (15)Truyện mới, (10)Top all, (11)top tháng, (12)top tuần, (13)top ngày, (30) số chapter
-// ex: http://localhost:8000/all/status=-1&sort=15&page=1
-app.get("/all/status=:status&sort=:sort&page=:pageNumber", (req, res) => {
-    const manga = [];
-    const limit = Number(req.query.limit);
-    try {
-        axios(
-            url +
-                "?status=" +
-                req.params.status +
-                "&sort=" +
-                req.params.sort +
-                "&page=" +
-                req.params.pageNumber
-        )
-            .then(function (response) {
-                pushData(response, manga, limit, res);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    } catch (error) {
-        res.status(500).json(error);
-    }
-});
-
-// get manga by category, status and sort
-// ex: http://localhost:8000/all/action-95/status=-1&sort=30&page=1
-app.get("/all/:category/status=:status&sort=:sort&page=:pageNumber", (req, res) => {
-    const manga = [];
-    const limit = Number(req.query.limit);
-    try {
-        axios(
-            url +
-                req.params.category +
-                "?status=" +
-                req.params.status +
-                "&sort=" +
-                req.params.sort +
-                "&page=" +
-                req.params.pageNumber
-        )
-            .then(function (response) {
-                pushData(response, manga, limit, res);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+        if (page && !status && !sort) {
+            axios(url + req.params.category + "?page=" + page)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (!page && !status && !sort) {
+            axios(url + req.params.category)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (page && status && !sort) {
+            axios(url + req.params.category + "?status=" + status + "&page=" + page)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (!page && status && !sort) {
+            axios(url + req.params.category + "?status=" + status)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (status && page && sort) {
+            axios(
+                url + req.params.category + "?status=" + status + "&sort=" + sort + "&page=" + page
+            )
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        } else if (status && sort) {
+            axios(url + req.params.category + "?status=" + status + "&sort=" + sort)
+                .then(function (response) {
+                    pushData(response, manga, limit, res);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
     } catch (error) {
         res.status(500).json(error);
     }
@@ -247,6 +262,64 @@ app.get("/truyen-tranh/:mangaName/:chapterNumber/:dataId", (req, res) => {
                     }
                 });
                 res.status(200).json(chapters);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+// get v2 popular manga
+app.get("/v2", (req, res) => {
+    const manga = [];
+    const limit = Number(req.query.limit);
+    try {
+        axios(urlAnilist)
+            .then(function (response) {
+                const html = response.data;
+                const $ = cheerio.load(html);
+                $(".media-card", html).each(function () {
+                    const link = $(this).find(".cover").attr("href");
+                    const image = $(this).find(".cover .image").attr("src");
+                    const title = $(this).find(".title").text();
+                    manga.push({
+                        link: localUrl + link,
+                        image,
+                        title,
+                    });
+                });
+                if (limit && limit > 0) {
+                    res.status(200).json(manga.slice(0, limit));
+                } else {
+                    res.status(200).json(manga);
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+// v2 info
+app.get("/manga/:id/:mangaName", (req, res) => {
+    const mangaDetail = [];
+    try {
+        let url = "https://anilist.co/manga/" + req.params.id + "/" + req.params.mangaName;
+        axios(url)
+            .then(function (response) {
+                const html = response.data;
+                const $ = cheerio.load(html);
+                const banner = $(".banner", html).css("background-image");
+                const description = $(".description", html).text();
+                mangaDetail.push({
+                    banner,
+                    description,
+                });
+                res.status(200).json(mangaDetail);
             })
             .catch(function (error) {
                 console.log(error);
