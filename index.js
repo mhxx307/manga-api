@@ -29,7 +29,7 @@ function pushData(response, manga, limit, res) {
     const html = response.data;
     const $ = cheerio.load(html);
     $(".item", html).each(function () {
-        const name = $(this).find("a").attr("title");
+        const name = $(this).find("a").attr("title").split("Truyện tranh ")[1];
         const link = $(this).find("a").attr("href");
         const image = $(this).find("a > img").attr("data-original");
         const messageMain = $(this).find(".message_main");
