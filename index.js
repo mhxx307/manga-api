@@ -329,6 +329,8 @@ app.get("/manga/:id/:mangaName", (req, res) => {
     }
 });
 
+// v2 chapter
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
