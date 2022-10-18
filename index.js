@@ -22,7 +22,7 @@ const url = "https://nettruyenco.vn/tim-truyen/";
 const urlTruyenTranh = "https://nettruyenco.vn/truyen-tranh/";
 const urlAnilist = "https://anilist.co/search/manga/popular";
 
-const localUrl = `https://manga-api-be05.onrender.com`;
+const localUrl = `https://manga-api-e6vn.onrender.com`;
 // const localUrl = `http://localhost:${port}`;
 
 function pushData(response, manga, limit, res) {
