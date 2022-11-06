@@ -22,8 +22,8 @@ const url = "https://nettruyenco.vn/tim-truyen/";
 const urlTruyenTranh = "https://nettruyenco.vn/truyen-tranh/";
 const urlTruyenTranhLh = "https://truyentranhlh.net/tim-kiem";
 
-// const localUrl = `https://manga-api-4cze.onrender.com`;
-const localUrl = `http://localhost:${port}`;
+const localUrl = `https://manga-api-4cze.onrender.com`;
+// const localUrl = `http://localhost:${port}`;
 
 // ===================NETTRUYENCO===================== //
 function pushData(response, manga, limit, res) {
